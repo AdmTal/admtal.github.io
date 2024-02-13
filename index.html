@@ -142,6 +142,14 @@
         var isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
         // Enable generate button if at least one checkbox is checked, otherwise disable
         generateButton.disabled = !isChecked;
+        if (!isChecked) {
+          // Add disabled styles
+          generateButton.classList.add('bg-gray-300', 'cursor-not-allowed', 'opacity-50');
+        } else {
+          // Remove disabled styles and add normal styles
+          generateButton.classList.remove('bg-gray-300', 'cursor-not-allowed', 'opacity-50');
+          generateButton.classList.add('bg-blue-500', 'hover:bg-blue-700');
+        }
       }
       // Add event listener to all checkboxes to check their state on change
       document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
@@ -215,7 +223,7 @@
       });
       playAgainButton.addEventListener('click', function() {
         hideResultsScreen()
-        startGame();
+        showConfigScreen();
       });
 
       function setPasswordConfig() {
