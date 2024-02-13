@@ -1,11 +1,16 @@
+<!-- https://github.com/AdmTal/admtal.github.io -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta name="description" content="Generate strong and secure passwords by collecting letters, numbers, and symbols in a basket">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GPSCWQ07B0"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+
+      function gtag() {
+        dataLayer.push(arguments);
+      }
       gtag('js', new Date());
       gtag('config', 'G-GPSCWQ07B0');
     </script>
@@ -19,14 +24,14 @@
       <div class="overlay-content bg-white p-6 rounded-lg shadow-lg max-w-sm w-full mx-4 text-center">
         <h2 class="text-xl font-semibold mb-4">Strong Password Generator</h2>
         <div class="mb-6">
-          <label for="passwordLength" class="block text-sm font-medium text-gray-700">Password Length:</label>
+          <label for="passwordLength" class="block text-sm font-medium text-gray-700">Password Length</label>
           <div class="relative flex items-center">
             <button type="button" class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-l-lg p-2 focus:ring-4 focus:outline-none focus:ring-gray-100" onclick="decrementValue()">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"></path>
               </svg>
             </button>
-            <input type="text" id="passwordLength" class="w-full text-center border-t border-b border-gray-300 focus:ring-blue-500 focus:border-blue-500" value="16" readonly>
+            <input type="text" id="passwordLength" class="w-full text-center border-t border-b border-gray-300 focus:ring-blue-500 focus:border-blue-500" value="16">
             <button type="button" class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-r-lg p-2 focus:ring-4 focus:outline-none focus:ring-gray-100" onclick="incrementValue()">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
@@ -55,8 +60,8 @@
     </div>
     <div id="resultOverlay" class="result-overlay fixed inset-0 bg-black bg-opacity-80 z-10 flex items-center justify-center" style="display: none">
       <div class="overlay-content bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4 text-center">
-        <h2 class="text-xl font-semibold mb-4">Password Generated:</h2>
-        <div id="capturedWord" class="mb-4 p-4 bg-gray-100 rounded text-gray-700"></div>
+        <h2 class="text-xl font-semibold mb-4">Password Generated</h2>
+        <div id="capturedWord" class="mb-4 p-4 bg-gray-100 rounded text-gray-700" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"></div>
         <div class="relative" id="tooltipContainer">
           <button id="copyButton" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 w-full mb-2" data-clipboard-text="Text to be copied"> Copy to clipboard </button>
           <div id="tooltip" class="hidden absolute z-10 w-auto p-2 bg-gray-800 text-white text-sm rounded-md bottom-full mb-2"> Copied! </div>
@@ -65,21 +70,49 @@
       </div>
     </div>
     <script>
+      var passwordMinLength = 1;
+      var passwordMaxLength = 256;
+
       function decrementValue() {
         var value = parseInt(document.getElementById('passwordLength').value, 10);
-        value = isNaN(value) ? 16 : value;
-        value < 2 ? value = 2 : '';
+        value = isNaN(value) ? passwordMaxLength : value; // Use the maximum length as the default if the current value is NaN
+        value <= passwordMinLength ? value = passwordMinLength : ''; // Check if the value is less than or equal to the min before decrementing
         value--;
-        document.getElementById('passwordLength').value = value;
+        document.getElementById('passwordLength').value = value < passwordMinLength ? passwordMinLength : value; // Ensure not to go below the minimum length
       }
 
       function incrementValue() {
         var value = parseInt(document.getElementById('passwordLength').value, 10);
-        value = isNaN(value) ? 15 : value;
-        value > 31 ? value = 31 : '';
+        value = isNaN(value) ? passwordMinLength : value; // Use the minimum length as the default if the current value is NaN
+        value >= passwordMaxLength ? value = passwordMaxLength : ''; // Check if the value is greater than or equal to the max before incrementing
         value++;
-        document.getElementById('passwordLength').value = value;
+        document.getElementById('passwordLength').value = value > passwordMaxLength ? passwordMaxLength : value; // Ensure not to exceed the maximum length
       }
+      document.getElementById('passwordLength').addEventListener('input', function(e) {
+        // Allow the field to be empty and handle validation elsewhere
+        var value = e.target.value;
+        if (value) {
+          var numericValue = parseInt(value, 10);
+          if (isNaN(numericValue) || numericValue < passwordMinLength) {
+            // Don't automatically set to minimum to allow backspace to empty
+          } else if (numericValue > passwordMaxLength) {
+            e.target.value = passwordMaxLength; // Maximum password length
+          }
+        }
+      });
+      document.getElementById('passwordLength').addEventListener('blur', function(e) {
+        var value = e.target.value;
+        if (!value) {
+          e.target.value = passwordMinLength; // Set to minimum if field is empty
+        } else {
+          var numericValue = parseInt(value, 10);
+          if (isNaN(numericValue) || numericValue < passwordMinLength) {
+            e.target.value = passwordMinLength; // Ensure value is not below minimum
+          } else if (numericValue > passwordMaxLength) {
+            e.target.value = passwordMaxLength; // Ensure value is not above maximum
+          }
+        }
+      });
     </script>
     <canvas id="gameCanvas"></canvas>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
@@ -101,8 +134,22 @@
       var passwordLen = 16;
       var chars = '';
       var capturedChars = [];
+      // Function to check the state of checkboxes and enable/disable the generate button accordingly
+      function toggleGenerateButton() {
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        var generateButton = document.getElementById('startButton');
+        // Check if at least one checkbox is checked
+        var isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+        // Enable generate button if at least one checkbox is checked, otherwise disable
+        generateButton.disabled = !isChecked;
+      }
+      // Add event listener to all checkboxes to check their state on change
+      document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', toggleGenerateButton);
+      });
       // Show configuration overlay on page load
       window.onload = function() {
+        toggleGenerateButton();
         showConfigScreen();
       };
 
