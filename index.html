@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  </head>
+  <body class="h-full overflow-hidden">
+    <div id="configOverlay" class="config-overlay fixed inset-0 bg-black bg-opacity-80 z-10 flex items-center justify-center" style="display: none">
+      <div class="overlay-content bg-white p-6 rounded-lg shadow-lg max-w-sm w-full mx-4 text-center">
+        <h2 class="text-xl font-semibold mb-4">Strong Password Generator</h2>
+        <div class="mb-6">
+          <label for="passwordLength" class="block text-sm font-medium text-gray-700">Password Length:</label>
+          <div class="relative flex items-center">
+            <button type="button" class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-l-lg p-2 focus:ring-4 focus:outline-none focus:ring-gray-100" onclick="decrementValue()">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"></path>
+              </svg>
+            </button>
+            <input type="text" id="passwordLength" class="w-full text-center border-t border-b border-gray-300 focus:ring-blue-500 focus:border-blue-500" value="16" readonly>
+            <button type="button" class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-r-lg p-2 focus:ring-4 focus:outline-none focus:ring-gray-100" onclick="incrementValue()">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="flex items-center mb-4">
+          <input id="includeUppercase" type="checkbox" value="" checked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+          <label for="includeUppercase" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Uppercase Letters</label>
+        </div>
+        <div class="flex items-center mb-4">
+          <input id="includeLowercase" type="checkbox" value="" checked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+          <label for="includeLowercase" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Lowercase Letters</label>
+        </div>
+        <div class="flex items-center mb-4">
+          <input id="includeNumbers" type="checkbox" value="" checked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+          <label for="includeNumbers" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Numbers</label>
+        </div>
+        <div class="flex items-center mb-4">
+          <input id="includeSymbols" type="checkbox" value="" checked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+          <label for="includeSymbols" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Symbols</label>
+        </div>
+        <button id="startButton" class="mt-4 px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 w-full">Generate</button>
+      </div>
+    </div>
+    <div id="resultOverlay" class="result-overlay fixed inset-0 bg-black bg-opacity-80 z-10 flex items-center justify-center" style="display: none">
+      <div class="overlay-content bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4 text-center">
+        <h2 class="text-xl font-semibold mb-4">Password Generated:</h2>
+        <div id="capturedWord" class="mb-4 p-4 bg-gray-100 rounded text-gray-700"></div>
+        <div class="relative" id="tooltipContainer">
+          <button id="copyButton" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 w-full mb-2" data-clipboard-text="Text to be copied"> Copy to clipboard </button>
+          <div id="tooltip" class="hidden absolute z-10 w-auto p-2 bg-gray-800 text-white text-sm rounded-md bottom-full mb-2"> Copied! </div>
+        </div>
+        <button id="playAgainButton" class="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 w-full">Generate Another Password</button>
+      </div>
+    </div>
+    <script>
+      function decrementValue() {
+        var value = parseInt(document.getElementById('passwordLength').value, 10);
+        value = isNaN(value) ? 16 : value;
+        value < 2 ? value = 2 : '';
+        value--;
+        document.getElementById('passwordLength').value = value;
+      }
+
+      function incrementValue() {
+        var value = parseInt(document.getElementById('passwordLength').value, 10);
+        value = isNaN(value) ? 15 : value;
+        value > 31 ? value = 31 : '';
+        value++;
+        document.getElementById('passwordLength').value = value;
+      }
+    </script>
+    <canvas id="gameCanvas"></canvas>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+    <script>
+      // Initialization and configuration code
+      var configOverlay = document.getElementById('configOverlay');
+      var resultOverlay = document.getElementById('resultOverlay');
+      var passwordLengthInput = document.getElementById('passwordLength');
+      var includeUppercaseCheckbox = document.getElementById('includeUppercase');
+      var includeLowercaseCheckbox = document.getElementById('includeLowercase');
+      var includeNumbersCheckbox = document.getElementById('includeNumbers');
+      var includeSymbolsCheckbox = document.getElementById('includeSymbols');
+      var startButton = document.getElementById('startButton');
+      var playAgainButton = document.getElementById('playAgainButton');
+      var capturedWordDiv = document.getElementById('capturedWord');
+      var gameCanvas = document.getElementById('gameCanvas');
+      var isGameActive = false;
+      var passwordLen = 16;
+      var chars = '';
+      var capturedChars = [];
+      // Show configuration overlay on page load
+      window.onload = function() {
+        showConfigScreen();
+      };
+
+      function hideConfigScreen() {
+        configOverlay.style.display = 'none';
+      }
+
+      function showConfigScreen() {
+        configOverlay.style.display = 'flex';
+      }
+
+      function hideResultsScreen() {
+        resultOverlay.style.display = 'none';
+      }
+
+      function hideCursor() {
+        document.body.style.cursor = 'none';
+        // If using a specific game area, replace document.body with the element selector
+      }
+
+      function showCursor() {
+        document.body.style.cursor = '';
+        // Revert to default cursor when showing it again
+      }
+
+      function showResultsScreen() {
+        initCopyButton();
+        showCursor();
+        resultOverlay.style.display = 'flex';
+      }
+
+      function initCopyButton() {
+        // Initialize Clipboard.js
+        var clipboard = new ClipboardJS('#copyButton');
+        clipboard.on('success', function(e) {
+          showTooltip(e.trigger, 'Copied!');
+          hideTooltip(e.trigger);
+          e.clearSelection();
+        });
+        clipboard.on('error', function(e) {
+          showTooltip(e.trigger, 'Failed!');
+          hideTooltip(e.trigger);
+        });
+
+        function showTooltip(btn, message) {
+          var tooltip = document.getElementById('tooltip');
+          tooltip.innerHTML = message; // Set the tooltip message
+          tooltip.classList.remove('hidden'); // Show the tooltip
+          tooltip.style.left = `${btn.offsetLeft + (btn.offsetWidth / 2) - (tooltip.offsetWidth / 2)}px`; // Center below button
+          tooltip.style.top = `${btn.offsetTop - tooltip.offsetHeight - 8}px`; // Position above button
+        }
+
+        function hideTooltip(btn) {
+          setTimeout(function() {
+            var tooltip = document.getElementById('tooltip');
+            tooltip.classList.add('hidden'); // Hide the tooltip
+          }, 1000); // Tooltip visible for 1 second
+        }
+      }
+      startButton.addEventListener('click', function() {
+        setPasswordConfig();
+        startGame();
+      });
+      playAgainButton.addEventListener('click', function() {
+        hideResultsScreen()
+        startGame();
+      });
+
+      function setPasswordConfig() {
+        passwordLen = parseInt(passwordLengthInput.value);
+        chars = '';
+        if (includeUppercaseCheckbox.checked) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        if (includeLowercaseCheckbox.checked) chars += 'abcdefghijklmnopqrstuvwxyz';
+        if (includeNumbersCheckbox.checked) chars += '0123456789';
+        if (includeSymbolsCheckbox.checked) chars += '!@#$%^&*()_+-=[]{}\\|;:\'",.<>/?';
+      }
+      // Game initialization code...
+      var Engine = Matter.Engine,
+        Render = Matter.Render,
+        World = Matter.World,
+        Bodies = Matter.Bodies,
+        Body = Matter.Body,
+        Events = Matter.Events,
+        Mouse = Matter.Mouse,
+        MouseConstraint = Matter.MouseConstraint;
+      var engine = Engine.create({
+        gravity: {
+          y: 0.5
+        }
+      });
+      var render = Render.create({
+        canvas: gameCanvas,
+        engine: engine,
+        options: {
+          width: window.innerWidth,
+          height: window.innerHeight,
+          wireframes: false,
+          background: 'white'
+        }
+      });
+      Engine.run(engine);
+      Render.run(render);
+      var basket = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 30, 120, 60, {
+        isStatic: true,
+        render: {
+          sprite: {
+            texture: 'the_basket.png',
+          }
+        }
+      });
+      World.add(engine.world, basket);
+      var mouse = Mouse.create(render.canvas),
+        mouseConstraint = MouseConstraint.create(engine, {
+          mouse: mouse,
+          constraint: {
+            stiffness: 0.2,
+            render: {
+              visible: false
+            }
+          }
+        });
+      World.add(engine.world, mouseConstraint);
+      // Update basket position to follow the mouse
+      Events.on(mouseConstraint, 'mousemove', function(event) {
+        Body.setPosition(basket, {
+          x: event.mouse.position.x,
+          y: event.mouse.position.y
+        });
+      });
+
+      function createTile(char) {
+        var tile = Bodies.rectangle(Math.random() * window.innerWidth, -30, 50, 50, {
+          render: {
+            sprite: {
+              texture: generateImageWithText(50, char),
+              xScale: 1,
+              yScale: 1
+            }
+          }
+        });
+        tile.char = char;
+        return tile;
+      }
+
+      function generateImageWithText(size, text) {
+        var canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 40px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, size / 2, size / 2);
+        return canvas.toDataURL('image/png');
+      }
+      Events.on(engine, 'collisionStart', function(event) {
+        var pairs = event.pairs;
+        pairs.forEach(function(pair) {
+          if (pair.bodyA === basket || pair.bodyB === basket) {
+            var tile = pair.bodyA === basket ? pair.bodyB : pair.bodyA;
+            if (isGameActive) {
+              capturedChars.push(tile.char);
+              World.remove(engine.world, tile);
+              if (capturedChars.length >= passwordLen) {
+                capturedWordDiv.textContent = capturedChars.join('');
+                document.getElementById('copyButton').setAttribute('data-clipboard-text', capturedWordDiv.textContent);
+                showResultsScreen();
+                isGameActive = false;
+                resetGame();
+              }
+            }
+          }
+        });
+      });
+
+      function resetGame() {
+        Matter.World.clear(engine.world, false); // Keep the renderer
+        Matter.World.add(engine.world, basket); // Re-add the basket
+        capturedChars = []; // Clear captured characters
+      }
+
+      function dropTiles() {
+        if (isGameActive) {
+          var char = chars.charAt(Math.floor(Math.random() * chars.length));
+          World.add(engine.world, createTile(char));
+        }
+      }
+      setInterval(dropTiles, 50); // Adjust for desired "rain" effect
+      function startGame() {
+        hideCursor();
+        resetGame();
+        hideConfigScreen();
+        isGameActive = true;
+      }
+    </script>
+  </body>
+</html>
