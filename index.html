@@ -196,6 +196,11 @@
           showTooltip(e.trigger, 'Copied!');
           hideTooltip(e.trigger);
           e.clearSelection();
+          gtag('event', 'copy_password', {
+            'event_category': 'Password Actions',
+            'event_label': 'Copied',
+            'value': 1
+          });
         });
         clipboard.on('error', function(e) {
           showTooltip(e.trigger, 'Failed!');
@@ -224,6 +229,11 @@
       playAgainButton.addEventListener('click', function() {
         hideResultsScreen()
         showConfigScreen();
+        gtag('event', 'regenerate_password', {
+          'event_category': 'Password Actions',
+          'event_label': 'Regenerated',
+          'value': 1
+        });
       });
 
       function setPasswordConfig() {
@@ -363,6 +373,11 @@
         resetGame();
         hideConfigScreen();
         isGameActive = true;
+        gtag('event', 'generate_password', {
+          'event_category': 'Password Actions',
+          'event_label': 'Generated',
+          'value': 1
+        });
       }
     </script>
   </body>
