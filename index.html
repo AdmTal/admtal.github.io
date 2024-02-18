@@ -115,8 +115,8 @@
       });
     </script>
     <canvas id="gameCanvas"></canvas>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js" integrity="sha384-zK5ns8b0WcxIMkoHeJcId6wBMOLV6CZVAltYHwGPJj32qDvjh5PJimYKa77YB9sH" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js" integrity="sha384-CUdYwYFu8WmBI8h257c5rCd1GQX0KL+zSYV6kyRNY2thW7QqQymKGfTCI1WHwzvy" crossorigin="anonymous"></script>
     <script>
       // Initialization and configuration code
       var configOverlay = document.getElementById('configOverlay');
@@ -258,7 +258,7 @@
           background: 'white'
         }
       });
-      Engine.run(engine);
+      Matter.Runner.run(engine)
       Render.run(render);
       var basket = Bodies.rectangle(window.innerWidth / 2, window.innerHeight - 150, 120, 60, {
         isStatic: true,
@@ -289,7 +289,10 @@
       });
 
       function createTile(char) {
-        var tile = Bodies.rectangle(Math.random() * window.innerWidth, -30, 50, 50, {
+        var array = new Uint32Array(1);
+        window.crypto.getRandomValues(array);
+        var positionX = array[0] % window.innerWidth;
+        var tile = Bodies.rectangle(positionX, -30, 50, 50, {
           render: {
             sprite: {
               texture: generateImageWithText(50, char),
@@ -316,6 +319,7 @@
         ctx.fillText(text, size / 2, size / 2);
         return canvas.toDataURL('image/png');
       }
+      
       Events.on(engine, 'collisionStart', function(event) {
         var pairs = event.pairs;
         pairs.forEach(function(pair) {
@@ -344,11 +348,16 @@
 
       function dropTiles() {
         if (isGameActive) {
-          var char = chars.charAt(Math.floor(Math.random() * chars.length));
+          // Use crypto.getRandomValues for secure random number generation
+          var arr = new Uint32Array(1);
+          window.crypto.getRandomValues(arr);
+          var char = chars.charAt(arr[0] % chars.length);
           World.add(engine.world, createTile(char));
         }
       }
-      setInterval(dropTiles, 50); // Adjust for desired "rain" effect
+
+      // Adjust for desired "rain" effect
+      setInterval(dropTiles, 50);
       function startGame() {
         hideCursor();
         resetGame();
